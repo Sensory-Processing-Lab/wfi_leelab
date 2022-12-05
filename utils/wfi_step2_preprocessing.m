@@ -2,16 +2,15 @@ function ops = wfi_step2_preprocessing(ops)
 
 % Parameters
 
-d = 0; % some kind of bias for stim_frame
-trialNum = 10;
+d = 1; % some kind of bias for stim_frame
+trialNum = ops.trialNum;
 t = 1:70;
 nPix = 128;
-nStimType = 12;
 
 
+% load(fullfile(ops.folder,filesep,'ROI_to2.mat'))
+load('ROI_to2.mat')
 
-
-load(fullfile(ops.folder,filesep,'ROI_to2.mat'))
 K = ones(512,512);
 invtform = invert(ops.tform);
 rotated_ROI_to2 = imwarp(gpuArray(ROI_to2),invtform,'OutputView',imref2d(size(K)));
@@ -33,21 +32,21 @@ close(h1)
 ops.spf = dir(fullfile(ops.folder,filesep,'*.csv'));
 ops.spf = readmatrix(fullfile(ops.folder,filesep,ops.spf(1,1).name));
 
-Pre_Main_ROI = cell(nStimType,2);
-F0 = cell(nStimType,2);
-Main_ROI = cell(nStimType,2);
-Delta_F = cell(nStimType,2);
-Fchange = cell(nStimType,2);
-F_rev = cell(nStimType,2);
+Pre_Main_ROI = cell(ops.nStimType,2);
+F0 = cell(ops.nStimType,2);
+Main_ROI = cell(ops.nStimType,2);
+Delta_F = cell(ops.nStimType,2);
+Fchange = cell(ops.nStimType,2);
+F_rev = cell(ops.nStimType,2);
 
 % start of loop for all stimTypes
 
     fprintf('Time %3.0fs. Preprocessing data ...  \n', toc);
 
 
-for stInd1 = 1:12
+for stInd1 = 1:ops.Nstim1
     
-    for stInd2 = 1:2
+    for stInd2 = 1:ops.Nstim2
 %         stInd1 = 1;
 %         stInd2 = 1;
         
@@ -61,7 +60,7 @@ for stInd1 = 1:12
         %start of trial loop
         for k = 1:trialNum
             
-            [~, stim_frame] = min(abs(ops.spf(:,3)-ops.StimTypeOrder{stInd1,stInd2}(k,2)));
+            [~, stim_frame] = min(abs(ops.spf(:,4)-ops.StimTypeOrder{stInd1,stInd2}(k,2))); %change 3 to 4 if event marker in csv
             stim_frame = stim_frame +d;
             
             Control_ROI(k) = sum(ops.total_value(x2,y2,stim_frame-10:stim_frame-1))/(10);
@@ -92,7 +91,7 @@ ops.t = t;
 
 % clearvars ops.total_value
 ops.total_value = [];
-
+%ops.Control_ROI = Control_ROI; -example
 
 save('Step1_data_REV2.mat','ops','-v7.3')
 

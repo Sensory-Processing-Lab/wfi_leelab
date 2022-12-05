@@ -33,15 +33,23 @@ data = textscan(fid,'%s %u %s %u %d %u %*[^\n]',Inf, 'Delimiter', '\t');
 
 fclose(fid);
 
+% CHANGE HERE
+% 22/11/25 JHL
+% Currently code for stim presentation is not finished, therefore the code
+% needs to be changed manually here to match with Presentation logfiles
 
-order_list = find(strcmp(data{3}, 'Video') | strcmp(data{3},'Sound'));
+
+% order_list = find(strcmp(data{3}, 'Video') | strcmp(data{3},'Sound'));
+
+order_list = find(strcmp(data{3},'Picture') & data{4} == 2000);
 StimOrder = [data{4}(order_list) data{5}(order_list)];
-
 StimOrder = double(StimOrder);
 StimOrder(:,2) = (StimOrder(:,2)-double(data{5}(1)))/1e4; % subtract image onset
 
-nStimType = 12;
-ops.StimTypeOrder = cell(nStimType,2);
+
+% CHANGE END
+
+ops.StimTypeOrder = cell(ops.nStimType,2);
 
 x = StimParameters();
 

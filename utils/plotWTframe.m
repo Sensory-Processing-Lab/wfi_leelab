@@ -1,7 +1,7 @@
 function plotWTframe(outData2, minV_e, maxV_e,ROI_to2,stInd1, stInd2,x,tt, ops)
 
-load(fullfile(ops.folder,filesep,'Final_Atlas_info_0217.mat'))
-
+% load(fullfile(ops.folder,filesep,'Final_Atlas_info_0217.mat'))
+load('Final_Atlas_info_0217.mat')
 
 
 ROI_all = edge(double(ROI_to2));

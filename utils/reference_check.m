@@ -1,7 +1,10 @@
 function ops = reference_check(ops)
+% 
+% load(fullfile(ops.folder,filesep,'AllenRef_withRef_10tilt.mat'),'Atlas_withRef_small')
+% load(fullfile(ops.folder,filesep,'ROI_coord_info.mat'),'*32')
 
-load(fullfile(ops.folder,filesep,'AllenRef_withRef_10tilt.mat'),'Atlas_withRef_small')
-load(fullfile(ops.folder,filesep,'ROI_coord_info.mat'),'*32')
+load('AllenRef_withRef_10tilt.mat','Atlas_withRef_small')
+load('ROI_coord_info.mat','*32')
 
 
 RefPoint = Atlas_withRef_small(:,:,3);
@@ -29,6 +32,13 @@ imshow(Jregistered_r)
 hold on
 scatter(ycoor_32,xcoor_32,1,'r','filled')
 savefig(h3,fullfile(ops.folder,filesep,'Ref_check_rev_220420'))
+
+fprintf('Check borders. press space \n');
+pause
+try
+    close(h3)
+catch
+end
 clear h3
 save(fullfile(ops.folder,filesep,'AtlasMap3.mat'),'-v7.3')
 

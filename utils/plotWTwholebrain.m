@@ -1,7 +1,7 @@
 function plotWTwholebrain(ops, outData2,V_e_whole,ROI_to2,x,stInd1,stInd2)
 
 
-load(fullfile(ops.folder,filesep,'Final_Atlas_info_0217.mat'))
+load('Final_Atlas_info_0217.mat')
 
 
 

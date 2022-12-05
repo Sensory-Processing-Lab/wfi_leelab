@@ -2,15 +2,15 @@ function ops = wfi_step2_gen_image(ops)
 
 
 % finding min for all frames
-minV = zeros(12,2);
-maxV = zeros(12,2);
+minV = zeros(ops.nStimType,2);
+maxV = zeros(ops.nStimType,2);
 
 % mean_Fchange_whole_brain = zeros(size(mean_Fchange{stInd1,stInd2},1),size(mean_Fchange{stInd1,stInd2},2));
-minVwhole = zeros(12,2);
-maxVwhole = zeros(12,2);
+minVwhole = zeros(ops.nStimType,2);
+maxVwhole = zeros(ops.nStimType,2);
 
-for stInd1 = 1:12
-    for stInd2 = 1:2
+for stInd1 = 1:ops.Nstim1
+    for stInd2 = 1:ops.Nstim2
         ops.mean_Fchange{stInd1,stInd2}(isnan(ops.mean_Fchange{stInd1,stInd2})) = zeros(1,1,1,1);
         minV(stInd1,stInd2) = prctile(ops.mean_Fchange{stInd1,stInd2},5,'all');
         maxV(stInd1,stInd2) = prctile(ops.mean_Fchange{stInd1,stInd2},95,'all');
@@ -43,8 +43,12 @@ V_e_whole.max = mm;
 
 
 %%
-load(fullfile(ops.folder,filesep,'Circle_example.mat'))
-load(fullfile(ops.folder,filesep,'Final_Atlas_info_0217.mat'),'ROI_to2')
+% load(fullfile(ops.folder,filesep,'Circle_example.mat'))
+% load(fullfile(ops.folder,filesep,'Final_Atlas_info_0217.mat'),'ROI_to2')
+
+load('Circle_example.mat')
+load(('Final_Atlas_info_0217.mat'),'ROI_to2')
+
 try
     mkdir(fullfile(ops.folder,filesep,'WithROI_temporal_pre10post30_1sec_v2'))
     mkdir(fullfile(ops.folder,filesep,'Wholebrain_figures'))
@@ -72,9 +76,9 @@ x = StimParameters();
 
 fprintf('Generating Heatmaps per frame ... \n');
 
-for stInd1 = 1:12
+for stInd1 = 1:ops.Nstim1
 
-    for stInd2 = 1:2
+    for stInd2 = 1:ops.Nstim2
 
         J = imresize3(ops.mean_Fchange{stInd1,stInd2},[size(ops.frame,1),size(ops.frame,1),ops.t(end)]);
         C2 = imresize(C,size(J,1)/size(C,1));
@@ -121,7 +125,7 @@ for stInd1 = 1:12
         
         
         % whole brain, average between 11 and 40th frames
-        temp_J = Jregistered(border_F2(1):border_F2(end),border_F(1):border_F(end));
+        temp_J = Jregistered_whole(border_F2(1):border_F2(end),border_F(1):border_F(end));
         temp_J(temp_J==0) = median(temp_J,'all');
         
         outData2 = zeros(size(ops.RefPoint,1), size(ops.RefPoint,2));
@@ -141,7 +145,7 @@ for stInd1 = 1:12
 end
 save('NotNormedData_rev','outData2','-v7.3')
 
-fprintf('Time % 3.0fs. Generating Heatmaps per frame ... \n', toc);
+fprintf('Time % 3.0fs. Generating Heatmaps per frame ... Done \n', toc);
 
 
 clear outData3;
