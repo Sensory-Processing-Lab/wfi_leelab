@@ -6,7 +6,7 @@ x.StimID = [
     ];
 
 x.StimTag = {
-    'footshock_0.200mA_200ms'
+    'footshock_0.150mA_200ms_1pulse'
     };
 
 % x.StimID = [
