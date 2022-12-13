@@ -30,7 +30,7 @@ close all
 clear ops
 
 % add filepath for necessary functions
-ops.data_dir = 'D:\GitHub\LeeLab';
+ops.data_dir = 'K:\GitHub';
 addpath(genpath(fullfile(ops.data_dir, filesep, 'wfi_leelab'))); 
 
 % define number of stimuli
