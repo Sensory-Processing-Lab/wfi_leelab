@@ -4,6 +4,9 @@ function ops = wfi_init(ops)
 addpath(genpath(fullfile(ops.data_dir, filesep,'wfi_leelab\utils')));
 addpath(genpath(fullfile(ops.data_dir, filesep,'core')));
 ops.folder = uigetdir(ops.data_dir);
+ops = readlog(ops);
+
+
 fname_tif = dir(fullfile(ops.folder,filesep,'Data*.tif'));
 fname_tif = natsortfiles({fname_tif.name});
 gpuDevice()
