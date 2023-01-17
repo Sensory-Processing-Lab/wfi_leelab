@@ -1,4 +1,4 @@
-function [bV, bU, blockInd, wfAvg]= blockSVD_wf(opts,rotated_ROI_to2)
+function [bV,bS, bU, blockInd, wfAvg]= blockSVD_wf(opts,rotated_ROI_to2)
 
 % Code to convert raw data from a given imaging experiment to a
 % low-dimensional representation. Imaging data consists of a single imaging
@@ -169,7 +169,7 @@ save([opts.folder 'wfAvg.mat'],'wfAvg');
 wfAvg = mean(single(wfAvg),3);
 
 %% compress each block with SVD
-bU = cell(nrBlocks,1); bV = cell(nrBlocks,1);
+bU = cell(nrBlocks,1); bV = cell(nrBlocks,1); bS = cell(nrBlocks,1);
 for iBlocks = 1 : nrBlocks
     
     % load current block
@@ -183,6 +183,7 @@ for iBlocks = 1 : nrBlocks
     [bV{iBlocks}, s, bU{iBlocks}] = fsvd(allBlock,opts.blockDims); %U and V are flipped here because we transpoed the input.
     bV{iBlocks} = gather(s * bV{iBlocks}'); %multiply S into V, so only U and V from here on
     bU{iBlocks} = gather(bU{iBlocks});
+    bS{iBlocks} = s;
     clear allBlock
     
     if rem(iBlocks, round(nrBlocks / 5)) == 0

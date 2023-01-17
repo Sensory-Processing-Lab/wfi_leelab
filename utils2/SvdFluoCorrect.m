@@ -17,6 +17,7 @@ nV = reshape(nV,A,[])';
 % subtract means
 nV = bsxfun(@minus, nV, nanmean(nV));
 
+
 % high-pass blueV and hemoV above 0.1Hz
 [b, a] = butter(2,0.2/opts.frameRate, 'high');
 nV(~isnan(nV(:,1)),:) = single(filtfilt(b,a,double(nV(~isnan(nV(:,1)),:))));
@@ -31,7 +32,7 @@ frameCnt = 1:20;
 % Smooth bV
 nV = smoothWidefield(nV,frameCnt,opts.frameRate,highCut); %smooth blue channel
 
-Vout = bsxfun(@minus, nV, nanmean(nV,1)); %subtract mean
-
+% Vout = bsxfun(@minus, nV, nanmean(nV,1)); %subtract mean
+Vout = nV; 
 Vout = reshape(Vout', A, B);
 

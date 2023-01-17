@@ -47,5 +47,5 @@ fprintf('AtlasMap3.mat ... saved \n \n');
 ops.RefPoint = RefPoint;
 ops.tform = tform;
 
-fprintf('Check borders. if incorrect, run reference_check again');
+fprintf('Check borders. if incorrect, run reference_check again \n');
 

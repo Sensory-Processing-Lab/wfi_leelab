@@ -106,6 +106,10 @@ rotatROI = reshape(rotated_ROI_to2,1,[]);
 U2 = U.*rotatROI.';
 U = reshape(U,size(wfAvg,1),size(wfAvg,2),[]); %reshape to frame format
 
+test3 = U;
+figure
+imagesc(test3)
+
 %% filter, smooth and find traces
 
 Vout = SvdFluoCorrect(opts, U, nV, 10, 1);

@@ -27,12 +27,14 @@ file.
 
 01/12/2022 JHL
     Code completely rehauled to remove dF/F calculations by YHS and 
-    implement SVD as done in A
+    implement SVD as done in Anne Churchland's lab. The code now produces
+    a TIFF stack instead of TIF files and a movie
     
 
 
 %}
 close all
+clear all
 
 
 % run configuration file 
@@ -63,7 +65,7 @@ opts = reference_check(opts);
 load('ROI_to2.mat');
 
 K = ones(512,512);
-invtform = invert(ops.tform);
+invtform = invert(opts.tform);
 rotated_ROI_to2 = imwarp(gpuArray(ROI_to2),invtform,'OutputView',imref2d(size(K)));
 rotated_ROI_to2 = imresize(rotated_ROI_to2,1);
 
@@ -72,7 +74,7 @@ rotated_ROI_to2 = gather(rotated_ROI_to2);
 
 
 %% run dimensionality reduction
-[bV, bU, blockInd, wfAvg] = blockSVD_wf(opts,rotated_ROI_to2); %this loads raw data and does the first blockwise SVD
+[bV,bS, bU, blockInd, wfAvg] = blockSVD_wf(opts,rotated_ROI_to2); %this loads raw data and does the first blockwise SVD
 
 %% create whole-frame components
 %merge dimensions if bV is in dims x trials x frames format
@@ -87,6 +89,12 @@ end
 [nU, s, nV] = fsvd(bV,opts.dimCnt); %combine all blocks in a second SVD
 nV = s * nV'; %multiply S into V
 Sv = diag(s); %keep eigenvalues
+
+% figure
+% test = Sv.*Sv;
+% test = cumsum(test)/sum(test);
+% plot(cumsum(Sv)/sum(Sv));
+
 
 %% combine blocks back into combined components
 [~, cellSize] = cellfun(@size,bU,'UniformOutput',false);
@@ -125,40 +133,71 @@ Vout = SvdFluoCorrect(opts, U, nV, 10, 1);
 
 
 %% dF/F0 analysis on temporal components
-fileCnt = opts.StimTypeOrder{1}(end,1);
-baseline_arr = [];
-for tr = 1:fileCnt
-    baseline_arr = [baseline_arr,(tr-1)*opts.nFrames+1:(tr-1)*opts.nFrames+10];
-end
-
-nVbase= mean(nV(:,baseline_arr),2); % subtract baseline activity
-nV = (nV-nVbase)./nVbase;           % divide by baseline activity 
-
-% figure
-% for k = 1:20
-%     test = mean(reshape(nV(k,:),[],20),2);
-%     plot(test)
-%     hold on
-%     pause
+% baseline_arr = [];
+% for tr = 1:fileCnt
+%     baseline_arr = [baseline_arr,(tr-1)*opts.nFrames+1:(tr-1)*opts.nFrames+10];
 % end
+% 
+% % nVbase= mean(nV(:,baseline_arr),2); % subtract baseline activity
+% % nV2 = (nV-nVbase)./nVbase;           % divide by baseline activity 
+% 
+% % figure
+% % for k = 1:20
+% %     test = mean(reshape(nV(k,:),[],20),2);
+% %     plot(test)
+% %     hold on
+% %     pause
+% % end
+% % Vbase= mean(Vout(:,baseline_arr),2); % subtract baseline activity
+% Vout2 = Vout./abs(nVbase);           % divide by baseline activity 
+% 
+% 
 
 
-data_re = U2(:,1:10)*nV(1:10,:);
-data_re = reshape(data_re,size(wfAvg,1),size(wfAvg,2),[]);
+%%
+fileCnt = opts.StimTypeOrder{1}(end,1);
+
+opts.dims2 = 100;
+
+data_re = U2(:,1:opts.dims2)*Vout(1:opts.dims2,:);
+data_dim1 = U2(:,1)*nV(1,:);
+
+% data_re = bsxfun(@rdivide,data_re,data_dim1);
+% 
+% data_re(isnan(data_re)) =0;
+% 
+% data_re = reshape(data_re,size(wfAvg,1),size(wfAvg,2),[]);
+data_re = reshape(data_dim1,size(wfAvg,1),size(wfAvg,2),[]);
 % imagesc(data_re(:,:,1))
 
 mean_data = mean(reshape(data_re,size(wfAvg,1),size(wfAvg,2),[],fileCnt),4);
 
+min_max = [min(min(min(mean_data))),max(max(max(mean_data)))];
+
+% mean_data = mean_data/max(abs(min_max));
+
 figure
 for tr = 1:70
     imagesc(mean_data(:,:,tr))
-    caxis([min(min(min(mean_data))),max(max(max(mean_data)))]);
+    caxis(min_max);
     pause(0.1)
 end
 
 
+%% debugging 
+
+figure
+
+test2 = reshape(nV,200,[],fileCnt);
+test2 = mean(test2,3);
+
+for tr = 1:10
+    plot(test2(tr,:))
+    hold on
+end
+
 
 %% produce and save data
-wf_gen_image(mean_data, ROI_to2,1, 1, ops, opts);
+wf_gen_image(mean_data, ROI_to2,1, 1, opts);
 
 
