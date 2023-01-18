@@ -1,4 +1,5 @@
 function [header,data] = loadRawData(ops, tr)
+rotatROI = reshape(rotated_ROI_to2,1,[]);
 
 
 % fpath = 'D:\GitHub\LeeLab\WFimg\221209_foot_shock_100uA_50ms_10Hz_awake\';
@@ -15,7 +16,7 @@ if tr == 0
     stimframe = 20;
     
 else
-    stimframe = ops.StimTypeOrder{1,1}(tr,3); 
+    stimframe = ops.StimOrder(tr,5); 
 end
 
 header = ops.spf(stimframe-11:stimframe+ops.nFrames-11,3);
@@ -33,5 +34,9 @@ for fr = 1:length(header)
     end
     data(:,:,fr) = imread(cFile);
 end
+
+
+
+data = data
 
 

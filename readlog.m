@@ -33,10 +33,11 @@ fclose(fid);
 % Currently code for stim presentation is not finished, therefore the code
 % needs to be changed manually here to match with Presentation logfiles
 
-
-% order_list = find(strcmp(data{3}, 'Video') | strcmp(data{3},'Sound'));
-
-order_list = find(strcmp(data{3},'Picture') & data{4} == 2000);
+if ops.nStimType > 2
+    order_list = find(strcmp(data{3}, 'Video') | strcmp(data{3},'Sound'));
+else
+    order_list = find(strcmp(data{3},'Picture') & data{4} == 2000);
+end
 StimOrder = [data{4}(order_list) data{5}(order_list)];
 StimOrder = double(StimOrder);
 StimOrder(:,2) = (StimOrder(:,2)-double(data{5}(1)))/1e4; % subtract image onset
@@ -48,9 +49,21 @@ StimOrder(:,2) = (StimOrder(:,2)-double(data{5}(1)))/1e4; % subtract image onset
 x = StimParameters();
 ops.StimTypeOrder = {};
 
+for st3 = 1:length(StimOrder)
+    [StimOrder(st3,3),StimOrder(st3,4),~] = find(x.StimID == StimOrder(st3,1));
+    StimOrder(st3,5) = floor(StimOrder(st3,2)*ops.frameRate);
+end
+    
+
 for st1 = 1: size(x.StimTag,1)
     for st2 = 1:size(x.StimTag,2)
         st_list = find(StimOrder(:,1) == x.StimID(st1,st2));
         ops.StimTypeOrder{st1,st2} = [st_list, StimOrder(st_list,2), floor(StimOrder(st_list,2)*ops.frameRate)];
     end
 end
+
+ops.StimOrder = StimOrder;
+
+
+
+

@@ -123,8 +123,8 @@ disp('Second SVD complete'); toc;
 
 nV = reshape(nV, size(nV,1), [], 1); % split channels
 rotatROI = reshape(rotated_ROI_to2,1,[]);
-% U2 = U.*rotatROI.';
-U2 = U;
+U2 = U.*rotatROI.';
+% U2 = U;
 U = reshape(U,size(wfAvg,1),size(wfAvg,2),[]); %reshape to frame format
 
 %% filter, smooth and find traces
@@ -155,51 +155,86 @@ Vout = SvdFluoCorrect(opts, U, nV, 10, 1);
 % 
 
 
-%%
-fileCnt = opts.StimTypeOrder{1}(end,1);
+%% Separating and computing Vout per stim
+
+
+[Vout2, opts] = ana_Vout(Vout,opts);
+
+% for tr = 1:12
+%     figure(tr)
+%     for ttr = 1:10
+%         plot(Vout2.mean{tr,1}(ttr,:))
+%         hold on
+%     end
+% end
+
+
+% st1 = 1;
+% st2 = 2;
+
 
 opts.dims2 = 100;
 
-data_re = U2(:,1:opts.dims2)*Vout(1:opts.dims2,:);
-data_dim1 = U2(:,1)*nV(1,:);
+%% Visualize components
+
+figure
+for k = 1:9
+    subplot(3,3,k)
+    imagesc(U(:,:,k))
+end
+
+
+
+%% produce and save data
+tic
+fprintf('Time %3.0fs. Generating image...  \n', toc);
+
+for st1 = 1:opts.Nstim1
+    for st2 = 1:opts.Nstim2
+        
+        mean_data = U2(:,1:opts.dims2)*Vout2.mean{st1,st2}(1:opts.dims2,:);
+        mean_data = reshape(mean_data,size(wfAvg,1),size(wfAvg,2),[]);
+        min_max = [min(min(min(mean_data))),max(max(max(mean_data)))];
+        wf_gen_image(mean_data, ROI_to2,st1, st2, opts,1);
+    end
+end
+fprintf('Time %3.0fs. Generating image... Done!  \n', toc);
+
+
+
+% data_dim1 = U2(:,1)*nV(1,:);
 
 % data_re = bsxfun(@rdivide,data_re,data_dim1);
 % 
 % data_re(isnan(data_re)) =0;
 % % 
-data_re = reshape(data_re,size(wfAvg,1),size(wfAvg,2),[]);
 % data_re = reshape(data_dim1,size(wfAvg,1),size(wfAvg,2),[]);
 % imagesc(data_re(:,:,1))
 
-mean_data = mean(reshape(data_re,size(wfAvg,1),size(wfAvg,2),[],fileCnt),4);
+% mean_data = mean(reshape(data_re,size(wfAvg,1),size(wfAvg,2),[],fileCnt),4);
 
-min_max = [min(min(min(mean_data))),max(max(max(mean_data)))];
 
 % mean_data = mean_data/max(abs(min_max));
 
-figure
-for tr = 1:70
-    imagesc(mean_data(:,:,tr))
-    caxis(min_max);
-    pause(0.1)
-end
+% figure
+% for tr = 1:70
+%     imagesc(data_re(:,:,tr))
+%     caxis(min_max);
+%     pause(0.1)
+% end
 
 
 %% debugging 
 
-figure
+% figure
+% 
+% test2 = reshape(Vout,200,[],fileCnt);
+% test2 = mean(test2,3);
+% 
+% for tr = 1:10
+%     plot(test2(tr,:))
+%     hold on
+% end
 
-test2 = reshape(Vout,200,[],fileCnt);
-test2 = mean(test2,3);
 
-for tr = 1:10
-    plot(test2(tr,:))
-    hold on
-end
-
-
-%% produce and save data
-tic
-wf_gen_image(mean_data, ROI_to2,1, 1, opts,0);
-toc
 

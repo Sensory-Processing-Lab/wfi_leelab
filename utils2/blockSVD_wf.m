@@ -37,8 +37,8 @@ tic;
 
 %% check if rawData files are present and get trialnumbers for all files
 
-opts = readlog(opts);
-fileCnt = opts.StimTypeOrder{1}(end,1);
+% opts = readlog(opts);
+fileCnt = length(opts.StimOrder(:,1));
 
 
 %% get reference images for motion correction
@@ -97,7 +97,7 @@ end
 
 % frameCnt = NaN(2,fileCnt, 'single'); %use thise to report how many frames were collected in each trial
 wfBlocks = zeros(1,nrBlocks);
-alldata = zeros([size(wfData,1), size(wfData,2), size(wfData,3), fileCnt],'single');
+% alldata = zeros([size(wfData,1), size(wfData,2), size(wfData,3), fileCnt],'single');
 
 opts.baselineFrames = 10;
 
