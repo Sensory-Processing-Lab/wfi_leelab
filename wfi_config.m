@@ -2,9 +2,9 @@ clear opts
 
 % define number of stimuli
 % eventually, this code will be included in the initialization phase 
-opts.nStimType = 24; %VA stim --> 24
-opts.Nstim1 = 12; %12
-opts.Nstim2 = 2; %2
+opts.nStimType = 1; %VA stim --> 24
+opts.Nstim1 = 1; %12
+opts.Nstim2 = 1; %2
 opts.trialNum = 20; 
 opts.frameRate = 30;
 opts.nFrames = 70;

@@ -6,6 +6,12 @@ x = StimParameters();
 
 ROI_all = edge(double(ROI_to2));
 [xc3,yc3]=find(ROI_all == 1);
+
+
+if ~exist(fullfile(opts.folder, filesep,'WithROI_temporal_pre10post30_1sec', 'dir'))
+    
+    mkdir(fullfile(opts.folder, filesep,'WithROI_temporal_pre10post30_1sec'))
+end
 savedir = fullfile(opts.folder, filesep,'WithROI_temporal_pre10post30_1sec', ...
                     filesep, ['WIthROI_' x.StimTag{stInd1,stInd2} '.tiff']);
 savedir2 = fullfile(opts.folder, filesep,'WithROI_temporal_pre10post30_1sec', ...
@@ -44,7 +50,6 @@ if savefig_on ==1
     savefig(h2,savedir2);
 end
 
-
 % make video
 v = VideoWriter(fullfile(opts.folder,filesep,'WithROI_temporal_pre10post30_1sec', ...
     filesep,[x.StimTag{stInd1,stInd2},'_heatmap.avi']), 'Uncompressed AVI');
@@ -79,13 +84,16 @@ for fr = 1: opts.nFrames
 
     end
     %             set(h, 'visible', 'on')
+    close(h)
     
 end
+
+
+% close(h2)
 
 close(v)
 
 
 
-close(h)
 
 

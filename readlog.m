@@ -53,7 +53,9 @@ for st3 = 1:length(StimOrder)
     [StimOrder(st3,3),StimOrder(st3,4),~] = find(x.StimID == StimOrder(st3,1));
     StimOrder(st3,5) = floor(StimOrder(st3,2)*ops.frameRate);
 end
-    
+
+
+
 
 for st1 = 1: size(x.StimTag,1)
     for st2 = 1:size(x.StimTag,2)

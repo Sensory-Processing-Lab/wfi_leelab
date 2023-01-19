@@ -73,6 +73,14 @@ rotated_ROI_to2 = gather(rotated_ROI_to2);
 
 
 
+% testing for only auditory 
+
+% c = ismember(opts.StimOrder(:,1),[111,121,112,122,113,123]);
+% aud_ind = find(c);
+% 
+% opts.StimOrder = opts.StimOrder(aud_ind,:);
+
+
 %% run dimensionality reduction
 [bV,bS, bU, blockInd, wfAvg] = blockSVD_wf(opts,rotated_ROI_to2); %this loads raw data and does the first blockwise SVD
 
@@ -124,7 +132,7 @@ disp('Second SVD complete'); toc;
 nV = reshape(nV, size(nV,1), [], 1); % split channels
 rotatROI = reshape(rotated_ROI_to2,1,[]);
 U2 = U.*rotatROI.';
-% U2 = U;
+U2 = U;
 U = reshape(U,size(wfAvg,1),size(wfAvg,2),[]); %reshape to frame format
 
 %% filter, smooth and find traces
@@ -160,7 +168,7 @@ Vout = SvdFluoCorrect(opts, U, nV, 10, 1);
 
 [Vout2, opts] = ana_Vout(Vout,opts);
 
-% for tr = 1:12
+% for tr = 1
 %     figure(tr)
 %     for ttr = 1:10
 %         plot(Vout2.mean{tr,1}(ttr,:))
@@ -173,26 +181,29 @@ Vout = SvdFluoCorrect(opts, U, nV, 10, 1);
 % st2 = 2;
 
 
-opts.dims2 = 100;
 
 %% Visualize components
 
-figure
-for k = 1:9
-    subplot(3,3,k)
-    imagesc(U(:,:,k))
-end
+% figure
+% for k = 1:9
+%     subplot(3,3,k)
+%     imagesc(U(:,:,k))
+% end
 
 
 
 %% produce and save data
+
+opts.dim2 = 100;
+
 tic
 fprintf('Time %3.0fs. Generating image...  \n', toc);
 
 for st1 = 1:opts.Nstim1
     for st2 = 1:opts.Nstim2
         
-        mean_data = U2(:,1:opts.dims2)*Vout2.mean{st1,st2}(1:opts.dims2,:);
+        mean_data = U2(:,1:opts.dim2)*Vout2.mean{st1,st2}(1:opts.dim2,:);
+%         mean_data = U2(:,1:opts.dim2)*nV(1:opts.dim2,:);
         mean_data = reshape(mean_data,size(wfAvg,1),size(wfAvg,2),[]);
         min_max = [min(min(min(mean_data))),max(max(max(mean_data)))];
         wf_gen_image(mean_data, ROI_to2,st1, st2, opts,1);

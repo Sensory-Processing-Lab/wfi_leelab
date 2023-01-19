@@ -1,5 +1,5 @@
 function [header,data] = loadRawData(ops, tr)
-rotatROI = reshape(rotated_ROI_to2,1,[]);
+% rotatROI = reshape(rotated_ROI_to2,1,[]);
 
 
 % fpath = 'D:\GitHub\LeeLab\WFimg\221209_foot_shock_100uA_50ms_10Hz_awake\';
@@ -37,6 +37,5 @@ end
 
 
 
-data = data
 
 
