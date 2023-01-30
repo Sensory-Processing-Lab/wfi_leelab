@@ -168,11 +168,11 @@ Vout = SvdFluoCorrect(opts, U, nV, 10, 1);
 
 [Vout2, opts] = ana_Vout(Vout,opts);
 
-cmap = colormap(parula(10));
+cmap = colormap(parula(12));
 for tr = 1:3
     figure(tr+10)
     c = 0;
-    for ttr = 3:10% I_thresh{tr,1} %I_10(1,:)
+    for ttr = I_thresh{tr,1} %I_10(1,:)
         c = c+1;
                 plot(smoothdata(Vout2.mean{tr,1}(ttr,:),'gaussian'),'Linewidth',2,...
                     'DisplayName',['c', num2str(ttr)],'color',cmap(ttr,:))
@@ -181,6 +181,7 @@ for tr = 1:3
         hold on
     end
 end
+
 
 
 % st1 = 1;
@@ -244,8 +245,8 @@ for st1 = 1:opts.Nstim1
         %             st3 = st1*2;
         %         end
         st3 = st1;
-        for i = 3:dimc
-            if mean(abs(Vout2.mean{st1,st2}(i,21:50))) < SD
+        for i = I2(st3,:)
+            if mean(abs(Vout2.mean{st1,st2}(I2(st3,i),21:50))) < SD/2
                 
                 
                 I2(st3,i) = 0;
@@ -274,6 +275,8 @@ I_10 = I(:,1:20);
 % plot_components(U,4)
 
 figure
+imagesc(U(:,:,4))
+
 
 
 for k = 1:9
@@ -291,10 +294,10 @@ opts.dim2 = 20;
 tic
 fprintf('Time %3.0fs. Generating image...  \n', toc);
 
-for st1 = 1:3
+for st1 = 2
     for st2 = 1
 
-        mean_data = U2(:,I_thresh{st1,st2})*Vout2.mean{st1,st2}(I_thresh{st1,st2},:);
+        mean_data = U2(:,3:100)*Vout2.mean{st1,st2}(3:100,:);
 %         mean_data = U2(:,1:opts.dim2)*nV(1:opts.dim2,:);
         mean_data = reshape(mean_data,size(wfAvg,1),size(wfAvg,2),[]);
         min_max = [min(min(min(mean_data))),max(max(max(mean_data)))];
@@ -309,7 +312,7 @@ fprintf('Time %3.0fs. Generating image... Done!  \n', toc);
 % 
 % figure(200)
 % imagesc(outdata)
-% caxis([-0.3,+0.3])
+caxis([-0.2,+0.2])
 
 % data_dim1 = U2(:,1)*nV(1,:);
 

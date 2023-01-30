@@ -168,7 +168,7 @@ Vout = SvdFluoCorrect(opts, U, nV, 10, 1);
 
 [Vout2, opts] = ana_Vout(Vout,opts);
 
-cmap = colormap(parula(10));
+cmap = colormap(parula(20));
 for tr = 1:3
     figure(tr+10)
     c = 0;
@@ -183,6 +183,7 @@ for tr = 1:3
 end
 
 
+
 % st1 = 1;
 % st2 = 2;
 
@@ -190,19 +191,32 @@ end
 %% Test correlation with Vout
 
 StimP = zeros(opts.nStimType,length(Vout));
+% 
+% for st1 = 1:opts.Nstim1
+%     for st2 = 1:opts.Nstim2
+%         ind = find(opts.StimOrder(:,3) == st1 & opts.StimOrder(:,4) == st2);
+%         for i = ind
+%             if st2 == 1
+%                 StimP((st1-1)*2+1,(i-1)*71 +21:(i-1)*71+50) = 1;
+%             elseif st2 ==2
+%                 StimP(st1*2,(i-1)*71 +21:(i-1)*71+50) = 1;
+%             end
+%         end
+%     end
+% end
+
 
 for st1 = 1:opts.Nstim1
-    for st2 = 1:opts.Nstim2
+    for st2 = 1
         ind = find(opts.StimOrder(:,3) == st1 & opts.StimOrder(:,4) == st2);
         for i = ind
             if st2 == 1
-                StimP((st1-1)*2+1,(i-1)*71 +21:(i-1)*71+50) = 1;
-            elseif st2 ==2
-                StimP(st1*2,(i-1)*71 +21:(i-1)*71+50) = 1;
+                StimP(st1,(i-1)*71 +21:(i-1)*71+50) = 1;
             end
         end
     end
 end
+
 
 
 corrmat = zeros(opts.nStimType,50);
@@ -214,7 +228,7 @@ for st = 1:opts.nStimType
 end
 
 [S,I] = sort(abs(corrmat),2,'descend');
-dimc = 30;
+dimc = 100;
 I = I(:,1:dimc);
 % [S,I] = sort(corrmat,2,'descend');
 %%
@@ -231,8 +245,10 @@ for st1 = 1:opts.Nstim1
         %             st3 = st1*2;
         %         end
         st3 = st1;
-        for i = 1:dimc
-            if mean(abs(Vout2.mean{st1,st2}(I(st3,i),21:50))) < SD
+        for i = I2(st3,:)
+            if mean(abs(Vout2.mean{st1,st2}(I2(st3,i),21:50))) < SD/2
+                
+                
                 I2(st3,i) = 0;
             end
             if I2(st3,i) ==1 || I2(st3,i) ==2
@@ -259,10 +275,12 @@ I_10 = I(:,1:20);
 % plot_components(U,4)
 
 figure
+imagesc(U(:,:,4))
 
 
-for k = 1:16
-    subplot(4,4,k)
+
+for k = 1:9
+    subplot(3,3,k)
     imagesc(U(:,:,k))
     subtitle(['a_' , num2str(k)])
 end
@@ -276,10 +294,10 @@ opts.dim2 = 20;
 tic
 fprintf('Time %3.0fs. Generating image...  \n', toc);
 
-for st1 = 1:3
+for st1 = 2
     for st2 = 1
 
-        mean_data = U2(:,3:100)*Vout2.mean{st1,st2}(3:100,:);
+        mean_data = U2(:,8:9)*Vout2.mean{st1,st2}(8:9,:);
 %         mean_data = U2(:,1:opts.dim2)*nV(1:opts.dim2,:);
         mean_data = reshape(mean_data,size(wfAvg,1),size(wfAvg,2),[]);
         min_max = [min(min(min(mean_data))),max(max(max(mean_data)))];
@@ -294,7 +312,7 @@ fprintf('Time %3.0fs. Generating image... Done!  \n', toc);
 % 
 % figure(200)
 % imagesc(outdata)
-caxis([-0.3,+0.3])
+caxis([-0.1,+0.1])
 
 % data_dim1 = U2(:,1)*nV(1,:);
 
