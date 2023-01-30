@@ -89,6 +89,7 @@ save([opts.folder 'blockInd.mat'],'blockInd');
 
 
 %% perform image alignement for separate channels and collect data in mov matrix
+
 wfAvg = zeros([size(wfData,1), size(wfData,2), fileCnt],'uint16'); %average for mean correction. Collect single session averages to verify correct channel separation.
 wfFrameTimes = cell(1, fileCnt);
 if ~exist([opts.folder 'blockData'], 'dir')
@@ -100,6 +101,12 @@ wfBlocks = zeros(1,nrBlocks);
 % alldata = zeros([size(wfData,1), size(wfData,2), size(wfData,3), fileCnt],'single');
 
 opts.baselineFrames = 10;
+
+
+
+% Load data per trial and store into individual blocks
+% to modify for Spontaneous recordings
+
 
 for iTrials = 1:fileCnt
     

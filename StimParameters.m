@@ -1,14 +1,37 @@
 function x = StimParameters()
 
 
+% x.StimID = [
+%     2000
+%     ];
+% 
+% x.StimTag = {
+%     'footshock_0.100mA_10Hz'
+%     };
+
+
+
 x.StimID = [
-    2000
+    191;
+    113;
+    913;
     ];
 
 x.StimTag = {
-    'footshock_0.100mA_10Hz'
+    'vis';
+    'aud';
+    'vis_aud';
     };
+    
 
+
+
+
+
+
+
+% 
+% 
 % x.StimID = [
 %     171,    271;
 %     181,    281;

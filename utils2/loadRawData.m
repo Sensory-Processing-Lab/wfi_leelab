@@ -14,7 +14,10 @@ header = [];
 
 if tr == 0
     stimframe = 20;
-    
+elseif tr == -1
+    %
+    % SPONTANEOUS RECORDING CODE
+    %
 else
     stimframe = ops.StimOrder(tr,5); 
 end

@@ -29,7 +29,7 @@ outdata2 = imwarp(outdata2,opts.tform,'OutputView',imref2d(size(opts.RefPoint)))
 
 % make mean figure
 
-mean_all_tr = mean(outdata2(:,:,10:40),3);
+mean_all_tr = mean(outdata2(:,:,20:40),3);
 h2 = figure('visible','off');
 imagesc(mean_all_tr)
 
@@ -48,51 +48,51 @@ set(h2, 'visible', 'on')
 
 if savefig_on ==1
     savefig(h2,savedir2);
-end
-
-% make video
-v = VideoWriter(fullfile(opts.folder,filesep,'WithROI_temporal_pre10post30_1sec', ...
-    filesep,[x.StimTag{stInd1,stInd2},'_heatmap.avi']), 'Uncompressed AVI');
-v.FrameRate = 5;
-open(v)
-
-for fr = 1: opts.nFrames
-    hold off
     
     
+    % make video
+    v = VideoWriter(fullfile(opts.folder,filesep,'WithROI_temporal_pre10post30_1sec', ...
+        filesep,[x.StimTag{stInd1,stInd2},'_heatmap.avi']), 'Uncompressed AVI');
+    v.FrameRate = 5;
+    open(v)
     
-    h = figure('visible','off');
-    imagesc(outdata2(:,:,fr))
-    
-    hold on
-    scatter(yc3,xc3,1,'k','filled')
-    hold on
-    for roi_num=1:39
-        eval(['scatter(ycoor_' num2str(roi_num) ',xcoor_' num2str(roi_num) ',1, ''k'',''filled'')'])
+    for fr = 1: opts.nFrames
+        hold off
+        
+        
+        
+        h = figure('visible','off');
+        imagesc(outdata2(:,:,fr))
+        
         hold on
-    end
-    set(h, 'Position', [100 200 500 350])
-%     caxis([min(min(min(outdata2))),max(max(max(outdata2)))]);
-    caxis(min_max);
-    if savefig_on ==1
-        if fr ==1
-            imwrite(getframe(h).cdata,savedir)
-        else
-            imwrite(getframe(h).cdata,savedir,'WriteMode','append')
+        scatter(yc3,xc3,1,'k','filled')
+        hold on
+        for roi_num=1:39
+            eval(['scatter(ycoor_' num2str(roi_num) ',xcoor_' num2str(roi_num) ',1, ''k'',''filled'')'])
+            hold on
         end
-        writeVideo(v,getframe(h).cdata)
-
+        set(h, 'Position', [100 200 500 350])
+        %     caxis([min(min(min(outdata2))),max(max(max(outdata2)))]);
+        caxis(min_max);
+        if savefig_on ==1
+            if fr ==1
+                imwrite(getframe(h).cdata,savedir)
+            else
+                imwrite(getframe(h).cdata,savedir,'WriteMode','append')
+            end
+            writeVideo(v,getframe(h).cdata)
+            
+        end
+        %             set(h, 'visible', 'on')
+        close(h)
+        
     end
-    %             set(h, 'visible', 'on')
-    close(h)
     
+    
+    % close(h2)
+    
+    close(v)
 end
-
-
-% close(h2)
-
-close(v)
-
 
 
 
