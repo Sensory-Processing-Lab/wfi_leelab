@@ -16,6 +16,7 @@ file.
 
 
 
+
     %%%%%%%%%%%%%%%%%%%%%% EDIT LOG %%%%%%%%%%%%%%%%%%%%%%%%
 
 11/25/2020 JHL
@@ -130,9 +131,14 @@ U = blockU * nU; %make new U with framewide components
 disp('Second SVD complete'); toc;
 
 nV = reshape(nV, size(nV,1), [], 1); % split channels
-rotatROI = reshape(rotated_ROI_to2,1,[]);
-% U2 = U.*rotatROI.';
-U2 = U;
+rotatROI = reshape(rotated_ROI_to2,1,[]); % hemisphere mask, to remove other pixels
+
+
+% Choose between the following: 
+% U2 = U.*rotatROI.'; % apply masking
+U2 = U; % don't apply masking
+
+
 U = reshape(U,size(wfAvg,1),size(wfAvg,2),[]); %reshape to frame format
 
 %% filter, smooth and find traces
@@ -168,11 +174,16 @@ Vout = SvdFluoCorrect(opts, U, nV, 10, 1);
 
 [Vout2, opts] = ana_Vout(Vout,opts);
 
-cmap = colormap(parula(12));
+% code for plotting temporal traces Vout2 
+% tr is stimulus ID
+% ttr is component ID
+
+
+cmap = colormap(parula(100));
 for tr = 1:3
     figure(tr+10)
     c = 0;
-    for ttr = I_thresh{tr,1} %I_10(1,:)
+    for ttr = 60 % I_thresh{tr,1} %I_10(1,:)
         c = c+1;
                 plot(smoothdata(Vout2.mean{tr,1}(ttr,:),'gaussian'),'Linewidth',2,...
                     'DisplayName',['c', num2str(ttr)],'color',cmap(ttr,:))
@@ -184,58 +195,8 @@ end
 
 
 
-% st1 = 1;
-% st2 = 2;
+%% 
 
-
-%% Test correlation with Vout
-
-StimP = zeros(opts.nStimType,length(Vout));
-% 
-% for st1 = 1:opts.Nstim1
-%     for st2 = 1:opts.Nstim2
-%         ind = find(opts.StimOrder(:,3) == st1 & opts.StimOrder(:,4) == st2);
-%         for i = ind
-%             if st2 == 1
-%                 StimP((st1-1)*2+1,(i-1)*71 +21:(i-1)*71+50) = 1;
-%             elseif st2 ==2
-%                 StimP(st1*2,(i-1)*71 +21:(i-1)*71+50) = 1;
-%             end
-%         end
-%     end
-% end
-
-
-for st1 = 1:opts.Nstim1
-    for st2 = 1
-        ind = find(opts.StimOrder(:,3) == st1 & opts.StimOrder(:,4) == st2);
-        for i = ind
-            if st2 == 1
-                StimP(st1,(i-1)*71 +21:(i-1)*71+50) = 1;
-            end
-        end
-    end
-end
-
-
-
-corrmat = zeros(opts.nStimType,50);
-for st = 1:opts.nStimType
-    for d = 1:100
-        [r,p] = corrcoef(Vout(d,:),StimP(st,:));
-        corrmat(st,d) = r(1,2);
-    end
-end
-
-[S,I] = sort(abs(corrmat),2,'descend');
-dimc = 100;
-I = I(:,1:dimc);
-% [S,I] = sort(corrmat,2,'descend');
-%%
-I2 = I;
-I_thresh = cell(opts.Nstim1,opts.Nstim2);
-
-SD =  std2(Vout(2:end,:));
 
 for st1 = 1:opts.Nstim1
     for st2 = 1:opts.Nstim2
@@ -245,30 +206,135 @@ for st1 = 1:opts.Nstim1
         %             st3 = st1*2;
         %         end
         st3 = st1;
-        for i = I2(st3,:)
-            if mean(abs(Vout2.mean{st1,st2}(I2(st3,i),21:50))) < SD/2
-                
-                
-                I2(st3,i) = 0;
-            end
-            if I2(st3,i) ==1 || I2(st3,i) ==2
-                I2(st3,i) = 0;
-            end
-        
-            
-        
+        I_thresh{st1,st2} = [];
+        for i = 3:100
+            if mean(abs(Vout2.mean{st1,st2}(i,11:40))) < SD/2            
+                I_thresh{st1,st2} = [I_thresh{st1,st2},i];
+            end       
         end
         
-            I_thresh{st1,st2} = I2(st3,find(I2(st3,:) >0));
-
     end
     
 end
 
 
+StimP = zeros(opts.nStimType,length(Vout));
 
 
-I_10 = I(:,1:20);
+for st1 = 1:opts.Nstim1
+    for st2 = 1
+        ind = find(opts.StimOrder(:,3) == st1 & opts.StimOrder(:,4) == st2);
+        for i = ind
+            if st2 == 1
+                StimP(st1,(i-1)*71 +11:(i-1)*71+40) = 1;
+            end
+        end
+    end
+end
+
+corrmat = cell(opts.nStimType,1);
+I = cell(opts.nStimType);
+S = cell(opts.nStimType);
+I2 = cell(opts.nStimType);
+
+for st = 1:opts.nStimType
+    corrmat{st} = [];
+    for d = I_thresh{st,1}
+        [r,p] = corrcoef(Vout(d,:),StimP(st,:));
+        corrmat{st} = [corrmat{st},r(1,2)];
+    end
+    [S{st},I{st}] = sort(corrmat{st},'descend');
+    I2{st} = I_thresh{st}(I{st});
+end
+
+
+% [S,I] = sort(abs(corrmat),2,'descend');
+% dimc = 100;
+% I = I(:,1:dimc);
+
+
+
+%% Test correlation with Vout Archived for now
+
+% StimP = zeros(opts.nStimType,length(Vout));
+% % 
+% % for st1 = 1:opts.Nstim1
+% %     for st2 = 1:opts.Nstim2
+% %         ind = find(opts.StimOrder(:,3) == st1 & opts.StimOrder(:,4) == st2);
+% %         for i = ind
+% %             if st2 == 1
+% %                 StimP((st1-1)*2+1,(i-1)*71 +21:(i-1)*71+50) = 1;
+% %             elseif st2 ==2
+% %                 StimP(st1*2,(i-1)*71 +21:(i-1)*71+50) = 1;
+% %             end
+% %         end
+% %     end
+% % end
+% 
+% 
+% for st1 = 1:opts.Nstim1
+%     for st2 = 1
+%         ind = find(opts.StimOrder(:,3) == st1 & opts.StimOrder(:,4) == st2);
+%         for i = ind
+%             if st2 == 1
+%                 StimP(st1,(i-1)*71 +11:(i-1)*71+40) = 1;
+%             end
+%         end
+%     end
+% end
+% 
+% 
+% 
+% corrmat = zeros(opts.nStimType,50);
+% for st = 1:opts.nStimType
+%     for d = 1:100
+%         [r,p] = corrcoef(Vout(d,:),StimP(st,:));
+%         corrmat(st,d) = r(1,2);
+%     end
+% end
+% 
+% [S,I] = sort(abs(corrmat),2,'descend');
+% dimc = 100;
+% I = I(:,1:dimc);
+% % [S,I] = sort(corrmat,2,'descend');
+%%
+% I2 = I;
+% I_thresh = cell(opts.Nstim1,opts.Nstim2);
+% 
+% SD =  std2(Vout(2:end,:));
+% 
+% for st1 = 1:opts.Nstim1
+%     for st2 = 1:opts.Nstim2
+%         %         if st2 ==1
+%         %             st3 = (st1-1)*2+1;
+%         %         else
+%         %             st3 = st1*2;
+%         %         end
+%         st3 = st1;
+%         for i = I2(st3,:)
+%             if mean(abs(Vout2.mean{st1,st2}(I2(st3,i),21:50))) < SD/2
+%                 
+%                 
+%                 I2(st3,i) = 0;
+%             end
+%             if I2(st3,i) ==1 || I2(st3,i) ==2
+%                 I2(st3,i) = 0;
+%             end
+%         
+%             
+%         
+%         end
+%         
+%             I_thresh{st1,st2} = I2(st3,find(I2(st3,:) >0));
+% 
+%     end
+%     
+% end
+% 
+% 
+% 
+% 
+% I_10 = I(:,1:20);
 
 %% Visualize components
 
@@ -294,7 +360,7 @@ opts.dim2 = 20;
 tic
 fprintf('Time %3.0fs. Generating image...  \n', toc);
 
-for st1 = 2
+for st1 = 1
     for st2 = 1
 
         mean_data = U2(:,3:100)*Vout2.mean{st1,st2}(3:100,:);

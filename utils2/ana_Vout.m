@@ -1,5 +1,11 @@
 function [Vout2, opts] = ana_Vout(Vout,opts)
 
+% function to segment temporal components Vout into trials
+% Vout2.raw contains for each stimulus type a matrix of 
+%                           n_components * n_frames * n_trials
+% note: baseline activity is not (although can be) subtracted from data
+
+
 
 nb_trials = [];
 
